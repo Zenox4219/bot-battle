@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI БАТЛ — Арена Дебатов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Unbounded:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F5F0E8;
+  --ink:   #1A1208;
+  --red:   #D62828;
+  --gold:  #F4A100;
+  --blue:  #0047AB;
+  --blue-b:#003380;
+  --paper: #EDE8DC;
+  --paper2:#E4DDD0;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Bebas Neue', 'Impact', sans-serif;
+  --body: 'Unbounded', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── Фоновая сетка в стиле миллиметровки ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(26,18,8,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,18,8,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════ HEADER ══════════════ */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ink);
+  display: flex;
+  align-items: stretch;
+  height: 56px;
+  border-bottom: 4px solid var(--gold);
+}
+
+.logo-block {
+  background: var(--red);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 100%, 0 100%);
+  padding-right: 40px;
+}
+
+.logo-text {
+  font-family: var(--display);
+  font-size: 28px;
+  color: var(--cream);
+  letter-spacing: 4px;
+  line-height: 1;
+}
+
+.logo-text em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.hdr-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.hdr-tagline {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(245,240,232,.4);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(245,240,232,.5);
+  letter-spacing: 2px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .5; transform: scale(.8); }
+}
+
+/* ══════════════ SETUP ══════════════ */
+#setup {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* Заголовок секций */
+.section-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--red);
+  opacity: .3;
+}
+
+/* ── Большой заголовок ── */
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(64px, 10vw, 100px);
+  line-height: .9;
+  color: var(--ink);
+  margin-bottom: 32px;
+  letter-spacing: 2px;
+}
+
+.hero-title .accent-a { color: var(--blue); }
+.hero-title .accent-b { color: var(--red); }
+
+/* ── Textarea темы ── */
+.topic-section { margin-bottom: 12px; }
+
+.topic-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: rgba(26,18,8,.5);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.topic-wrap textarea {
+  width: 100%;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 18px 20px;
+  outline: none;
+  resize: vertical;
+  min-height: 88px;
+  line-height: 1.6;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.topic-wrap textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 4px 4px 0 var(--blue);
+}
+
+.topic-wrap textarea::placeholder {
+  color: rgba(26,18,8,.3);
+  font-weight: 400;
+}
+
+.topic-hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(26,18,8,.4);
+  margin-top: 8px;
+  letter-spacing: .5px;
+}
+
+/* ── Чипы тем ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+
+.chip {
+  background: transparent;
+  border: 1.5px solid rgba(26,18,8,.2);
+  color: rgba(26,18,8,.6);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all .15s;
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+
+.chip:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+
+/* ── Бойцы ── */
+.fighters-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  align-items: stretch;
+  margin-bottom: 28px;
+  gap: 0;
+  border: 2px solid var(--ink);
+}
+
+.fighter-col {
+  padding: 24px;
+  background: var(--paper);
+}
+
+.fighter-col.a { border-right: 2px solid var(--ink); background: #EAF0FF; }
+.fighter-col.b { background: #FFF0F0; }
+
+.fighter-heading {
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+}
+
+.fighter-heading.a { color: var(--blue); }
+.fighter-heading.b { color: var(--red); }
+
+.fighter-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.fc-emoji {
+  font-size: 36px;
+  width: 48px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+  padding-top: 4px;
+}
+
+.fc-name {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.fc-name.a { color: var(--blue); }
+.fc-name.b { color: var(--red); }
+
+.fc-model {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(26,18,8,.4);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.fc-trait {
+  font-size: 11px;
+  color: rgba(26,18,8,.65);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* VS колонка */
+.vs-col {
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* ── Судья ── */
+.judge-info {
+  border: 2px solid var(--gold);
+  background: #FFFBF0;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.judge-emoji { font-size: 28px; }
+
+.judge-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.judge-name {
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: var(--ink);
+}
+
+.judge-model {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(26,18,8,.4);
+}
+
+/* ── Раунды ── */
+.rounds-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.rounds-row label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(26,18,8,.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.rounds-row input[type=range] {
+  accent-color: var(--blue);
+  width: 110px;
+  cursor: pointer;
+}
+
+.rounds-val {
+  font-family: var(--display);
+  font-size: 24px;
+  color: var(--blue);
+  min-width: 24px;
+  line-height: 1;
+}
+
+.dur-select {
+  background: var(--paper2);
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 0;
+  letter-spacing: 1px;
+  outline: none;
+}
+
+/* ── Кнопка старта ── */
+.btn-start {
+  width: 100%;
+  padding: 20px 32px;
+  background: var(--red);
+  border: none;
+  color: var(--cream);
+  font-family: var(--display);
+  font-size: 28px;
+  letter-spacing: 6px;
+  cursor: pointer;
+  transition: all .15s;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border-bottom: 5px solid #8B0000;
+}
+
+.btn-start:hover:not(:disabled) {
+  background: #BF1F1F;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #8B0000;
+  border-bottom-width: 0;
+}
+
+.btn-start:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+  border-bottom-width: 7px;
+}
+
+.btn-start:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+/* ══════════════ ARENA ══════════════ */
+#arena {
+  display: none;
+  position: relative;
+  z-index: 1;
+  padding: 0 24px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.arena-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0 16px;
+  border-bottom: 3px solid var(--ink);
+  margin-bottom: 20px;
+}
+
+.arena-topic-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: rgba(26,18,8,.4);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.arena-topic-text {
+  font-family: var(--display);
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--ink);
+}
+
+.btn-reset {
+  background: transparent;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all .15s;
+  text-transform: uppercase;
+}
+
+.btn-reset:hover {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+/* ── Scoreboard ── */
+.scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 20px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 0;
+  overflow: hidden;
+}
+
+.sc-side {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sc-side.right { align-items: flex-end; text-align: right; }
+
+.sc-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: .6;
+}
+
+.sc-name.a { color: #7EB3FF; }
+.sc-name.b { color: #FF8080; }
+
+.sc-pts {
+  font-family: var(--display);
+  font-size: 48px;
+  line-height: 1;
+  letter-spacing: 2px;
+}
+
+.sc-pts.a { color: #7EB3FF; }
+.sc-pts.b { color: #FF8080; }
+
+.sc-sep {
+  background: rgba(245,240,232,.1);
+  padding: 16px 20px;
+  font-family: var(--display);
+  font-size: 32px;
+  color: var(--gold);
+  text-align: center;
+}
+
+.sc-bar-wrap {
+  grid-column: 1/-1;
+  height: 5px;
+  background: rgba(245,240,232,.1);
+}
+
+.sc-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #7EB3FF, #FF8080);
+  width: 50%;
+  transition: width .6s ease;
+}
+
+/* ── Сетка арены ── */
+.battle-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.chat-col { display: flex; flex-direction: column; }
+
+/* ── Чат фид ── */
+.chat-feed {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-bottom: none;
+  min-height: 500px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chat-feed::-webkit-scrollbar { width: 4px; }
+.chat-feed::-webkit-scrollbar-thumb { background: rgba(26,18,8,.2); }
+
+/* ── Сообщения ── */
+.msg {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: slideIn .25s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.msg.right { align-items: flex-end; }
+.msg.center { align-items: center; }
+
+.msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.msg-meta.right { flex-direction: row-reverse; }
+
+.tag {
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 2px 10px 0;
+  border: 2px solid;
+  border-radius: 0;
+  text-transform: uppercase;
+}
+
+.tag-a {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.tag-b {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.tag-j {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.msg-time {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(26,18,8,.35);
+  letter-spacing: 1px;
+}
+
+.int-badge {
+  background: var(--ink);
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.bubble {
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.75;
+  max-width: 80%;
+  font-weight: 400;
+  border: 2px solid;
+}
+
+.bubble.a {
+  background: #EAF0FF;
+  border-color: var(--blue);
+  border-left-width: 4px;
+}
+
+.bubble.b {
+  background: #FFF0F0;
+  border-color: var(--red);
+  border-right-width: 4px;
+}
+
+.bubble.j {
+  background: #FFFBF0;
+  border-color: var(--gold);
+  border-width: 2px;
+  font-style: italic;
+  max-width: 92%;
+}
+
+/* ── Typing ── */
+.typing-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.typing-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dotPop 1.2s infinite;
+  margin: 0 2px;
+}
+
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+
+@keyframes dotPop {
+  0%, 80%, 100% { opacity: .15; transform: scale(1); }
+  40%            { opacity: 1;   transform: scale(1.3); }
+}
+
+/* ── Разделитель раундов ── */
+.round-sep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--ink);
+  margin: 4px 0;
+  text-transform: uppercase;
+}
+
+.round-sep::before, .round-sep::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: var(--ink);
+  opacity: .15;
+}
+
+/* ── Контролы чата ── */
+.chat-controls {
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  border-top: none;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.round-lbl {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(245,240,232,.5);
+  letter-spacing: 1px;
+}
+
+.round-lbl strong { color: var(--cream); }
+
+#timer-lbl {
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.btn-ctrl {
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: 3px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all .15s;
+  text-transform: uppercase;
+  border: 2px solid;
+  border-radius: 0;
+}
+
+.btn-ctrl.gold {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: transparent;
+}
+
+.btn-ctrl.gold:hover:not(:disabled) {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.btn-ctrl:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ══════════════ SIDEBAR ══════════════ */
+.sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+.scard {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 0;
+  overflow: hidden;
+}
+
+.scard-title {
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--gold);
+  padding: 8px 16px;
+  margin-bottom: 0;
+}
+
+.scard-body { padding: 16px; }
+
+/* ── Мини-бойцы ── */
+.fighter-mini {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(26,18,8,.1);
+}
+
+.fighter-mini:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.fmini-ava {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  border: 2px solid;
+}
+
+.fmini-ava.a { border-color: var(--blue); background: #EAF0FF; }
+.fmini-ava.b { border-color: var(--red);  background: #FFF0F0; }
+
+.fmini-name {
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.fmini-name.a { color: var(--blue); }
+.fmini-name.b { color: var(--red); }
+
+.fmini-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(26,18,8,.45);
+  line-height: 1.6;
+  letter-spacing: .5px;
+}
+
+/* ── Аналитика ── */
+.stat-item { margin-bottom: 14px; }
+.stat-item:last-of-type { margin-bottom: 0; }
+
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.stat-lbl {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(26,18,8,.5);
+  letter-spacing: 1px;
+}
+
+.stat-vals {
+  display: flex;
+  gap: 10px;
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.sv-a { color: var(--blue); }
+.sv-b { color: var(--red); }
+
+.minibar {
+  height: 4px;
+  background: rgba(26,18,8,.1);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.minibar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--red));
+  transition: width .5s ease;
+}
+
+.stat-hint {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(26,18,8,.4);
+  margin-top: 12px;
+  line-height: 1.7;
+  border-top: 1px solid rgba(26,18,8,.1);
+  padding-top: 10px;
+  letter-spacing: .3px;
+}
+
+/* ══════════════ WINNER MODAL ══════════════ */
+#winner {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,18,8,.92);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+#winner.show { display: flex; }
+
+.wbox {
+  background: var(--cream);
+  border: 4px solid var(--gold);
+  padding: 0;
+  max-width: 640px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: boxPop .4s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes boxPop {
+  from { opacity: 0; transform: scale(.85); }
+  to   { opacity: 1; transform: none; }
+}
+
+.wbox-header {
+  background: var(--ink);
+  padding: 24px 32px;
+  text-align: center;
+  border-bottom: 4px solid var(--gold);
+}
+
+.wcrown {
+  font-size: 56px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.wtitle {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.wname {
+  font-family: var(--display);
+  font-size: 42px;
+  letter-spacing: 4px;
+  margin-bottom: 0;
+}
+
+.wname.a   { color: #7EB3FF; }
+.wname.b   { color: #FF8080; }
+.wname.tie { color: var(--gold); }
+
+.wbox-body { padding: 28px 32px; }
+
+.wverdict {
+  font-size: 13px;
+  color: rgba(26,18,8,.7);
+  line-height: 1.8;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--paper);
+  border-left: 4px solid var(--gold);
+  font-style: italic;
+}
+
+.wstats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.wstat {
+  background: var(--paper);
+  border: 2px solid rgba(26,18,8,.1);
+  padding: 12px;
+  text-align: center;
+}
+
+.wstat-val {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.wstat-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(26,18,8,.45);
+  line-height: 1.4;
+  letter-spacing: .5px;
+}
+
+.btn-new {
+  width: 100%;
+  background: var(--red);
+  border: none;
+  border-bottom: 4px solid #8B0000;
+  color: var(--cream);
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 4px;
+  padding: 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .15s;
+}
+
+.btn-new:hover {
+  background: #BF1F1F;
+  transform: translateY(-2px);
+}
+
+/* ══════════════ TOAST ══════════════ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  border-left: 4px solid var(--gold);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  z-index: 400;
+  display: none;
+  max-width: 90vw;
+}
+
+.toast.show { display: block; animation: toastIn .25s ease; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ══════════════ RESPONSIVE ══════════════ */
+@media (max-width: 720px) {
+  .battle-grid { grid-template-columns: 1fr; }
+  .fighters-row { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
+  .vs-col { writing-mode: horizontal-tb; padding: 10px; border-left: none; border-right: none; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+  .fighter-col.a { border-right: none; border-bottom: 2px solid var(--ink); }
+  .wstats-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-title { font-size: 52px; }
+  .logo-text { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header>
+  <div class="logo-block">
+    <div class="logo-text">AI <em>БАТЛ</em></div>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-tagline">Арена интеллектуальных дебатов</div>
+  </div>
+  <div class="hdr-right">
+    <div class="status-dot"></div>
+    GROQ · COHERE · GEMINI
+  </div>
+</header>
+
+<!-- ══════════════ SETUP ══════════════ -->
+<div id="setup">
+
+  <div class="hero-title">
+    <span class="accent-a">Боец</span> А<br>
+    против<br>
+    Бойца <span class="accent-b">Б</span>
+  </div>
+
+  <div class="section-eyebrow">01 — Тема спора</div>
+  <div class="topic-section">
+    <div class="topic-wrap">
+      <textarea id="topic-input" rows="3" placeholder="Одна тема: ИИ заменит программистов?&#10;&#10;Или несколько (каждый раунд — своя):&#10;Раунд 1: ИИ заменит программистов?&#10;Раунд 2: А кто тогда создал эту арену?"></textarea>
+    </div>
+    <div class="topic-hint">💡 Разделяй темы новой строкой — каждый раунд получит свою тему</div>
+  </div>
+
+  <div class="chips">
+    <span class="chip" onclick="setTopic(this)">☀️ Утренняя vs вечерняя пробежка</span>
+    <span class="chip" onclick="setTopic(this)">🤖 ИИ заменит программистов?</span>
+    <span class="chip" onclick="setTopic(this)">🏙️ Город vs деревня</span>
+    <span class="chip" onclick="setTopic(this)">📚 Бумажные книги vs электронные</span>
+    <span class="chip" onclick="setTopic(this)">🚀 Марс vs Луна — что важнее?</span>
+    <span class="chip" onclick="setTopic(this)">🐱 Кошки лучше собак</span>
+    <span class="chip" onclick="setTopic(this)">☕ Кофе vs чай</span>
+    <span class="chip" onclick="setTopic(this)">💤 8 часов сна — миф?</span>
+  </div>
+
+  <div class="section-eyebrow">02 — Бойцы</div>
+  <div class="fighters-row">
+    <div class="fighter-col a">
+      <div class="fighter-heading a">⚡ БОЕЦ A</div>
+      <div class="fighter-card a">
+        <div class="fc-emoji">⚡</div>
+        <div>
+          <div class="fc-name a">Groq Llama</div>
+          <div class="fc-model">llama-3.3-70b-versatile · Groq</div>
+          <div class="fc-trait">Философ-провокатор. Ломает шаблоны, задаёт острые вопросы, отвечает резко и коротко.</div>
+        </div>
+      </div>
+    </div>
+    <div class="vs-col">VS</div>
+    <div class="fighter-col b">
+      <div class="fighter-heading b">🔥 БОЕЦ B</div>
+      <div class="fighter-card b">
+        <div class="fc-emoji">🪸</div>
+        <div>
+          <div class="fc-name b">Cohere Command A</div>
+          <div class="fc-model">command-a-03-2025 · Cohere</div>
+          <div class="fc-trait">Академичный аналитик. Оперирует данными, строит системные многоуровневые аргументы.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-eyebrow">03 — Арбитр</div>
+  <div class="judge-info">
+    <div class="judge-emoji">⚖️</div>
+    <div>
+      <div class="judge-label">Арбитр</div>
+      <div class="judge-name">Groq Llama 3.3</div>
+      <div class="judge-model">llama-3.3-70b-versatile · Groq — выносит финальный вердикт</div>
+    </div>
+  </div>
+
+  <div class="section-eyebrow">04 — Параметры</div>
+  <div class="rounds-row">
+    <label>Раундов:</label>
+    <input type="range" id="rounds-sl" min="1" max="3" value="2" oninput="$('rounds-val').textContent=this.value">
+    <span class="rounds-val" id="rounds-val">2</span>
+    <label>Длительность:</label>
+    <select id="dur-sl" class="dur-select">
+      <option value="30">30 сек</option>
+      <option value="60" selected>60 сек</option>
+      <option value="90">90 сек</option>
+    </select>
+  </div>
+
+  <button class="btn-start" onclick="startBattle()">⚡ НАЧАТЬ БОЙ</button>
+</div>
+
+<!-- ══════════════ ARENA ══════════════ -->
+<div id="arena">
+  <div class="arena-top">
+    <div>
+      <div class="arena-topic-lbl">// тема батла</div>
+      <div class="arena-topic-text" id="a-topic"></div>
+    </div>
+    <button class="btn-reset" onclick="resetBattle()">↩ Новый бой</button>
+  </div>
+
+  <div class="scoreboard">
+    <div class="sc-side">
+      <div class="sc-name a" id="sc-name-a">⚡ Groq Llama</div>
+      <div class="sc-pts a" id="sc-pts-a">0</div>
+    </div>
+    <div class="sc-sep">:</div>
+    <div class="sc-side right">
+      <div class="sc-name b" id="sc-name-b">🪸 Cohere A</div>
+      <div class="sc-pts b" id="sc-pts-b">0</div>
+    </div>
+    <div class="sc-bar-wrap"><div class="sc-bar" id="sc-bar"></div></div>
+  </div>
+
+  <div class="battle-grid">
+    <div class="chat-col">
+      <div class="chat-feed" id="chat-feed"></div>
+      <div class="chat-controls">
+        <div class="round-lbl">
+          Раунд <strong id="cur-rnd">1</strong> / <strong id="max-rnd">2</strong>
+          &nbsp;·&nbsp;
+          <span id="timer-lbl">⏱ —</span>
+        </div>
+        <div class="ctrl-btns">
+          <button class="btn-ctrl gold" id="btn-judge" onclick="callJudge()" disabled>⚖️ АРБИТР</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="scard">
+        <div class="scard-title">Участники</div>
+        <div class="scard-body">
+          <div class="fighter-mini">
+            <div class="fmini-ava a" id="fmini-ava-a">⚡</div>
+            <div>
+              <div class="fmini-name a" id="fmini-name-a">Groq Llama 70B</div>
+              <div class="fmini-sub" id="fmini-sub-a">Философ-провокатор<br>Meta · Groq</div>
+            </div>
+          </div>
+          <div class="fighter-mini">
+            <div class="fmini-ava b" id="fmini-ava-b">🪸</div>
+            <div>
+              <div class="fmini-name b" id="fmini-name-b">Cohere Command A</div>
+              <div class="fmini-sub" id="fmini-sub-b">Академичный аналитик<br>Cohere · command-a-03-2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div class="scard-title">Аналитика — Live</div>
+        <div class="scard-body">
+          <div class="stat-item">
+            <div class="stat-top"><span class="stat-lbl">📝 Слова</span><span class="stat-vals"><span class="sv-a" id="st-w-a">0</span><span class="sv-b" id="st-w-b">0</span></span></div>
+            <div class="minibar"><div class="minibar-fill" id="mb-w" style="width:50%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-top"><span class="stat-lbl">❓ Вопросы</span><span class="stat-vals"><span class="sv-a" id="st-q-a">0</span><span class="sv-b" id="st-q-b">0</span></span></div>
+            <div class="minibar"><div class="minibar-fill" id="mb-q" style="width:50%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-top"><span class="stat-lbl">🤝 Согласия</span><span class="stat-vals"><span class="sv-a" id="st-ag-a">0</span><span class="sv-b" id="st-ag-b">0</span></span></div>
+            <div class="minibar"><div class="minibar-fill" id="mb-ag" style="width:50%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-top"><span class="stat-lbl">⚡ Перебивания</span><span class="stat-vals"><span class="sv-a" id="st-int-a">0</span><span class="sv-b" id="st-int-b">0</span></span></div>
+            <div class="minibar"><div class="minibar-fill" id="mb-int" style="width:50%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-top"><span class="stat-lbl">🔥 Агрессия</span><span class="stat-vals"><span class="sv-a" id="st-a-a">0%</span><span class="sv-b" id="st-a-b">0%</span></span></div>
+            <div class="minibar"><div class="minibar-fill" id="mb-a" style="width:50%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-top"><span class="stat-lbl">❗ Восклицания</span><span class="stat-vals"><span class="sv-a" id="st-e-a">0</span><span class="sv-b" id="st-e-b">0</span></span></div>
+            <div class="minibar"><div class="minibar-fill" id="mb-e" style="width:50%"></div></div>
+          </div>
+
+          <div class="stat-hint">
+            🤝 согласия: «да», «верно», «согласен»…<br>
+            ⚡ перебивания: начинает с «Нет,», «Стоп»…<br>
+            🔥 агрессия: доля провокационных слов
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ WINNER MODAL ══════════════ -->
+<div id="winner">
+  <div class="wbox">
+    <div class="wbox-header">
+      <span class="wcrown" id="w-crown">🏆</span>
+      <div class="wtitle">Победитель батла</div>
+      <div class="wname" id="w-name">—</div>
+    </div>
+    <div class="wbox-body">
+      <div class="wstats-grid">
+        <div class="wstat"><div class="wstat-val sv-a" id="w-w-a">0</div><div class="wstat-lbl">Groq — слова</div></div>
+        <div class="wstat"><div class="wstat-val sv-b" id="w-w-b">0</div><div class="wstat-lbl">Cohere — слова</div></div>
+        <div class="wstat"><div class="wstat-val" id="w-agree" style="color:var(--blue)">0/0</div><div class="wstat-lbl">согласий A/B</div></div>
+        <div class="wstat"><div class="wstat-val" id="w-int" style="color:var(--gold)">0/0</div><div class="wstat-lbl">перебиваний A/B</div></div>
+        <div class="wstat"><div class="wstat-val" id="w-agg" style="color:var(--red)">0%/0%</div><div class="wstat-lbl">агрессия A/B</div></div>
+        <div class="wstat"><div class="wstat-val" id="w-q" style="color:var(--gold)">0/0</div><div class="wstat-lbl">вопросов A/B</div></div>
+      </div>
+      <div class="wverdict" id="w-verdict"></div>
+      <button class="btn-new" onclick="resetBattle()">⚡ Новый бой</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+<script>
+// ════════════════════════════════════════════════════════
+//  КОНФИГ — OpenRouter, один ключ для всех трёх моделей
+// ════════════════════════════════════════════════════════
+
+
+// ── Пул персонажей ──────────────────────────────────────
+const PERSONAS = [
+  {
+    id: 'skeptic',
+    name: 'Скептик',
+    emoji: '🧐',
+    trait: 'Не верит ни во что. Требует доказательств на каждый чих.',
+    style: `Ты законченный скептик в споре. Ни один аргумент не кажется тебе достаточно доказанным.
+— Всегда требуй источник или доказательство на слова оппонента
+— Указывай на логические дыры и допущения без фактов
+— Говори сухо, немного презрительно, без эмоций
+— Иногда используй фразы: "И где доказательства?", "Это не аргумент", "Звучит как предположение"`
+  },
+  {
+    id: 'romantic',
+    name: 'Романтик',
+    emoji: '🌹',
+    trait: 'Видит красоту и смысл во всём. Спорит через чувства и образы.',
+    style: `Ты романтик-идеалист в споре. Веришь в человека, красоту и высший смысл.
+— Отвечай через образы, метафоры и эмоции
+— Апеллируй к человеческому опыту и чувствам, а не к цифрам
+— Говори с воодушевлением, иногда почти поэтично
+— Иногда используй фразы: "Но разве не в этом смысл?", "Сердце знает больше"`
+  },
+  {
+    id: 'technocrat',
+    name: 'Технократ',
+    emoji: '🤖',
+    trait: 'Всё решают данные и алгоритмы. Эмоции — баг системы.',
+    style: `Ты технократ в споре. Мир — это система, которую можно оптимизировать.
+— Оперируй конкретными цифрами, метриками, KPI
+— Эмоциональные аргументы отметай как нерелевантные
+— Говори чётко, структурированно, без лишних слов
+— Иногда используй фразы: "Данные говорят иначе", "Это неоптимально", "Посмотрим на метрики"`
+  },
+  {
+    id: 'poet',
+    name: 'Поэт',
+    emoji: '🖊️',
+    trait: 'Говорит образами. Каждый аргумент — маленькая история.',
+    style: `Ты поэт-философ в споре. Мыслишь метафорами и парадоксами.
+— Отвечай через неожиданные образы и аналогии
+— Находи красивые парадоксы в словах оппонента
+— Говори загадочно, нестандартно, иногда задавай риторические вопросы
+— Иногда используй фразы: "Это как...", "Помнишь, как..."`
+  },
+  {
+    id: 'general',
+    name: 'Генерал',
+    emoji: '🎖️',
+    trait: 'Мыслит стратегически. Любой спор — это битва.',
+    style: `Ты боевой генерал в споре. Каждый диалог — тактическое сражение.
+— Анализируй аргументы оппонента как позиции противника и атакуй слабые места
+— Говори коротко, жёстко, по-военному
+— Используй военные метафоры: фланг, отступление, капитуляция
+— Иногда используй фразы: "Это слабая позиция", "Ваш аргумент окружён", "Сдавайтесь"`
+  },
+  {
+    id: 'cynic',
+    name: 'Циник',
+    emoji: '😏',
+    trait: 'Всё видит насквозь. За любым аргументом — чья-то выгода.',
+    style: `Ты прожжённый циник в споре. За каждым красивым словом ты видишь корысть.
+— Разоблачай скрытые мотивы в словах оппонента
+— Говори с иронией и лёгким сарказмом
+— Всё своди к реальным интересам: деньги, власть, эго
+— Иногда используй фразы: "Кому это выгодно?", "Красиво звучит, но...", "Давай честно"`
+  },
+  {
+    id: 'idealist',
+    name: 'Идеалист',
+    emoji: '✨',
+    trait: 'Верит что мир можно сделать лучше. Спорит с огнём в глазах.',
+    style: `Ты идеалист-реформатор в споре. Веришь что всё можно изменить к лучшему.
+— Апеллируй к ценностям, справедливости и потенциалу людей
+— Не принимай циничные аргументы — борись с ними
+— Говори страстно и убедительно
+— Иногда используй фразы: "Мы можем лучше", "Это несправедливо", "Представь если..."`
+  },
+  {
+    id: 'pragmatist',
+    name: 'Прагматик',
+    emoji: '🔧',
+    trait: 'Теория — мусор. Важно только то, что работает.',
+    style: `Ты прагматик в споре. Тебя интересует только одно: работает это или нет.
+— Отметай абстрактные рассуждения, требуй конкретики
+— Приводи примеры из реальной практики
+— Говори по-деловому, без воды
+— Иногда используй фразы: "На практике это не работает", "Конкретный пример?", "К делу"`
+  }
+];
+
+// ── Выбор случайных персонажей ───────────────────────────
+function pickPersonas() {
+  const arr = [...PERSONAS];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return [arr[0], arr[1]];
+}
+
+// Текущие персонажи — заполняются при startBattle
+let FIGHTER_A = { name:'?', emoji:'?', provider:'groq',   model:'llama-3.3-70b-versatile' };
+let FIGHTER_B = { name:'?', emoji:'?', provider:'cohere', model:'command-a-03-2025' };
+
+const JUDGE = {
+  name: 'Groq Llama Judge',
+  emoji: '⚖️',
+  provider: 'groq',
+  model: 'llama-3.3-70b-versatile'
+};
+
+// ── Словари метрик ──────────────────────────────────────
+const AGGRO = ['неверно','ошибка','неправильно','абсурд','провал','слабо','наивно','заблуждение','напротив','опровергаю','неубедительно','противоречит','глупо','бессмысленно','чушь','вздор','примитивно'];
+const AGREE = ['согласен','согласна','соглашусь','верно','правильно','действительно','справедливо','именно','точно','разумеется','конечно','да,','да.','да!','признаю','правда','справедливое замечание'];
+const INTERRUPT_STARTS = ['нет,','нет!','стоп','подождите','но ведь','но подождите','позвольте','однако,','но нет','неверно','ошибаетесь','не так','позвольте не','но стоп','сама постановка'];
+
+// ── State ───────────────────────────────────────────────
+let S = {
+  topic:'', topics:[], maxRounds:2, roundDur:60, curRound:0,
+  history:[], roundSummaries:[], scoreA:0, scoreB:0,
+  statsA:{w:0,q:0,e:0,agg:0,agrees:0,interrupts:0,n:0},
+  statsB:{w:0,q:0,e:0,agg:0,agrees:0,interrupts:0,n:0},
+  running:false
+};
+
+// ── Utils ───────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const now = () => new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+const words = t => t.trim().split(/\s+/).filter(Boolean).length;
+const qs  = t => (t.match(/\?/g)||[]).length;
+const exs = t => (t.match(/!/g)||[]).length;
+const bw  = (a,b) => a+b===0 ? 50 : Math.round(a/(a+b)*100);
+
+const countAggro = t => {
+  const w = t.toLowerCase().split(/\s+/);
+  return Math.round(w.filter(x => AGGRO.some(a => x.includes(a))).length / Math.max(w.length,1) * 100);
+};
+const countAgrees    = t => AGREE.filter(w => t.toLowerCase().includes(w)).length;
+const countInterrupt = t => INTERRUPT_STARTS.some(s => t.trim().toLowerCase().startsWith(s)) ? 1 : 0;
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4000); }
+function setTopic(el){ $('topic-input').value = el.textContent.replace(/^.{2}/,'').trim(); }
+
+function updateScore(){
+  $('sc-pts-a').textContent=S.scoreA;
+  $('sc-pts-b').textContent=S.scoreB;
+  const tot=S.scoreA+S.scoreB;
+  $('sc-bar').style.width=(tot?Math.round(S.scoreA/tot*100):50)+'%';
+}
+
+function updateStats(side, text){
+  const st = side==='A' ? S.statsA : S.statsB;
+  if(text){ st.w+=words(text); st.q+=qs(text); st.e+=exs(text); st.n++; st.agg=Math.round((st.agg*(st.n-1)+countAggro(text))/st.n); st.agrees+=countAgrees(text); st.interrupts+=countInterrupt(text); }
+  const sa=S.statsA, sb=S.statsB;
+  $('st-w-a').textContent=sa.w;       $('st-w-b').textContent=sb.w;       $('mb-w').style.width=bw(sa.w,sb.w)+'%';
+  $('st-q-a').textContent=sa.q;       $('st-q-b').textContent=sb.q;       $('mb-q').style.width=bw(sa.q,sb.q)+'%';
+  $('st-e-a').textContent=sa.e;       $('st-e-b').textContent=sb.e;       $('mb-e').style.width=bw(sa.e,sb.e)+'%';
+  $('st-a-a').textContent=sa.agg+'%'; $('st-a-b').textContent=sb.agg+'%'; $('mb-a').style.width=bw(sa.agg,sb.agg)+'%';
+  $('st-ag-a').textContent=sa.agrees; $('st-ag-b').textContent=sb.agrees; $('mb-ag').style.width=bw(sa.agrees,sb.agrees)+'%';
+  $('st-int-a').textContent=sa.interrupts; $('st-int-b').textContent=sb.interrupts; $('mb-int').style.width=bw(sa.interrupts,sb.interrupts)+'%';
+}
+
+// ── OpenRouter API ──────────────────────────────────────
+async function callOR(fighter, systemPrompt, messages) {
+  const msgs = [{role:'system', content:systemPrompt}, ...messages];
+
+  const r = await fetch('/api/battle', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ provider: fighter.provider, model: fighter.model, messages: msgs })
+  });
+
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || `Ошибка ${r.status}`);
+  if (!d.text) throw new Error('Пустой ответ от модели. Возможно, модель перегружена — попробуй ещё раз.');
+  // Если произошёл автоматический fallback — показываем уведомление
+  if (d.usedProvider && d.usedProvider.includes('fallback')) {
+    const fp = d.usedProvider.replace('-fallback','');
+    toast(`⚡ Groq достиг лимита — автопереключение на ${fp === 'gemini' ? 'Gemini' : 'Cohere'}`);
+  }
+  return d.text;
+}
+
+// ── Chat render ─────────────────────────────────────────
+function addMsg(who, name, text, hasInterrupt) {
+  const feed = $('chat-feed');
+  const side   = who==='A'?'left':who==='B'?'right':'center';
+  const tagCls = who==='A'?'tag-a':who==='B'?'tag-b':'tag-j';
+  const bubCls = who==='A'?'a':who==='B'?'b':'j';
+  const metaDir = who==='B'?'right':'';
+  const intBadge = hasInterrupt ? '<span class="int-badge">⚡ ПЕРЕБИЛ</span>' : '';
+  const div = document.createElement('div');
+  div.className = 'msg '+side;
+  div.innerHTML = `
+    <div class="msg-meta ${metaDir}">
+      <span class="tag ${tagCls}">${name}</span>
+      ${intBadge}
+      <span class="msg-time">${now()}</span>
+    </div>
+    <div class="bubble ${bubCls}">${text.replace(/\n/g,'<br>')}</div>`;
+  feed.appendChild(div);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function addSep(n){ const d=document.createElement('div'); d.className='round-sep'; d.textContent=`РАУНД ${n}`; $('chat-feed').appendChild(d); }
+
+function addTyping(label, colorVar) {
+  rmTyping();
+  const d = document.createElement('div');
+  d.id='typing'; d.className='msg center';
+  d.innerHTML=`<div class="typing-row"><span style="color:var(${colorVar});font-family:var(--mono);font-size:10px">${label}</span>&nbsp;<div class="dots"><span></span><span></span><span></span></div></div>`;
+  $('chat-feed').appendChild(d);
+  $('chat-feed').scrollTop = $('chat-feed').scrollHeight;
+}
+function rmTyping(){ const t=$('typing'); if(t) t.remove(); }
+
+// ── Build messages for each fighter ────────────────────
+function buildMsgs(forSide) {
+  const myName  = forSide==='A' ? FIGHTER_A.name : FIGHTER_B.name;
+  const oppName = forSide==='A' ? FIGHTER_B.name : FIGHTER_A.name;
+  const recent  = S.history.slice(-6);
+
+  if (!recent.length) {
+    const roundNum = S.curRound;
+    const prevCtx = S.roundSummaries.length > 0
+      ? ' Контекст предыдущих раундов: ' + S.roundSummaries.map(rs => `Раунд ${rs.round} (тема: "${rs.topic}"): ${rs.summary}`).join('. ')
+      : '';
+    return [{role:'user', content:`Раунд ${roundNum}. Тема этого раунда: "${S.topic}".${prevCtx} Открой свою позицию одним-двумя предложениями, ровно 15-20 слов.`}];
+  }
+
+  const msgs = [];
+  for (const h of recent) {
+    msgs.push({ role: h.name===myName ? 'assistant' : 'user', content: h.text });
+  }
+
+  if (msgs[msgs.length-1].role === 'assistant') {
+    msgs.push({role:'user', content:'Жди ответа оппонента.'});
+    return msgs;
+  }
+
+  const lastOpp = recent.filter(h => h.name === oppName).pop();
+  if (!lastOpp) return msgs;
+
+  // ── Динамическая агрессия ──
+  // Считаем "силу" последнего аргумента оппонента
+  const oppText = lastOpp.text.toLowerCase();
+  const hasStats    = /\d+%|\d+ раз|исследовани|данные|факт/.test(oppText);
+  const hasQuestion = oppText.includes('?');
+  const hasAggro    = AGGRO.some(w => oppText.includes(w));
+  const oppStrength = (hasStats ? 1 : 0) + (hasQuestion ? 1 : 0) + (hasAggro ? 1 : 0);
+
+  // Агрессия если оппонент сильный И рандом 40%
+  const goAggressive = oppStrength >= 2 && Math.random() < 0.4;
+
+  let instruction = `${oppName} сказал: "${lastOpp.text}"
+
+Ответь именно на этот аргумент. Ровно 15-20 слов, не больше и не меньше.`;
+  if (goAggressive) {
+    instruction += ' Оппонент давит сильно — можешь обострить тон, отвечай жёстче обычного.';
+  }
+
+  msgs.push({role:'user', content: instruction});
+  return msgs;
+}
+
+// ── Battle logic ────────────────────────────────────────
+// ── Parse topics from input ────────────────────────────
+function parseTopics(raw) {
+  return raw.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
+    .map(l => l.replace(/^раунд\s*\d+\s*[:.)\-]?\s*/i, '').trim())
+    .filter(l => l.length > 0);
+}
+
+async function startBattle() {
+  const raw = $('topic-input').value.trim();
+  if (!raw) { toast('Введи тему спора!'); return; }
+  const topics = parseTopics(raw);
+  if (!topics.length) { toast('Введи тему спора!'); return; }
+
+  // ── Выбираем случайных персонажей ──
+  const [pA, pB] = pickPersonas();
+  FIGHTER_A = { ...FIGHTER_A, name: pA.name, emoji: pA.emoji, style: pA.style, trait: pA.trait };
+  FIGHTER_B = { ...FIGHTER_B, name: pB.name, emoji: pB.emoji, style: pB.style, trait: pB.trait };
+
+  // ── Обновляем карточки бойцов в арене ──
+  $('sc-name-a').textContent = FIGHTER_A.emoji + ' ' + FIGHTER_A.name;
+  $('sc-name-b').textContent = FIGHTER_B.emoji + ' ' + FIGHTER_B.name;
+  $('fmini-name-a').textContent = FIGHTER_A.name;
+  $('fmini-name-b').textContent = FIGHTER_B.name;
+  $('fmini-ava-a').textContent  = FIGHTER_A.emoji;
+  $('fmini-ava-b').textContent  = FIGHTER_B.emoji;
+  $('fmini-sub-a').innerHTML    = FIGHTER_A.trait + '<br>Meta · Groq';
+  $('fmini-sub-b').innerHTML    = FIGHTER_B.trait + '<br>Cohere';
+
+  // Если тем больше чем раундов — используем количество тем как maxRounds
+  const maxRnds = Math.max(+$('rounds-sl').value, topics.length);
+  S.topics   = topics;
+  S.topic    = topics[0];  // первая тема
+  S.maxRounds = maxRnds;
+  S.roundDur  = +$('dur-sl').value;
+  S.curRound  = 0;
+  S.history   = [];
+  S.roundSummaries = [];
+  S.scoreA = 0; S.scoreB = 0;
+  S.statsA = {w:0,q:0,e:0,agg:0,agrees:0,interrupts:0,n:0};
+  S.statsB = {w:0,q:0,e:0,agg:0,agrees:0,interrupts:0,n:0};
+
+  $('setup').style.display = 'none';
+  $('arena').style.display = 'block';
+  $('a-topic').textContent = S.topic;
+  $('cur-rnd').textContent = 1;
+  $('max-rnd').textContent = S.maxRounds;
+  $('chat-feed').innerHTML = '';
+  $('btn-judge').disabled = true;
+  updateScore(); updateStats('A',''); updateStats('B','');
+
+  // Показываем кто против кого
+  const ann = document.createElement('div');
+  ann.className = 'round-sep';
+  ann.innerHTML = FIGHTER_A.emoji + ' ' + FIGHTER_A.name + ' &nbsp;VS&nbsp; ' + FIGHTER_B.emoji + ' ' + FIGHTER_B.name;
+  $('chat-feed').appendChild(ann);
+
+  await playRound();
+}
+
+async function playRound() {
+  S.running = true;
+  S.curRound++;
+
+  // Выбираем тему для этого раунда
+  if (S.topics.length > 1) {
+    const idx = Math.min(S.curRound - 1, S.topics.length - 1);
+    S.topic = S.topics[idx];
+  }
+  // Обновляем отображение темы
+  $('a-topic').textContent = S.topic;
+
+  $('cur-rnd').textContent = S.curRound;
+  $('btn-judge').disabled = true;
+
+  // Если несколько тем — показываем тему раунда как разделитель
+  if (S.topics.length > 1) {
+    const topicSep = document.createElement('div');
+    topicSep.className = 'round-sep';
+    topicSep.innerHTML = `РАУНД ${S.curRound} · ${S.topic}`;
+    $('chat-feed').appendChild(topicSep);
+  } else {
+    addSep(S.curRound);
+  }
+
+  const roundEnd = Date.now() + S.roundDur * 1000;
+
+  // Countdown ticker
+  const ticker = setInterval(() => {
+    const left = Math.max(0, Math.ceil((roundEnd - Date.now()) / 1000));
+    $('timer-lbl').textContent = left > 0 ? `⏱ ${left}с` : '⏱ 0с';
+    if (left === 0) clearInterval(ticker);
+  }, 500);
+
+  // Alternate turns until time runs out
+  let turn = 'A'; // A goes first
+  while (Date.now() < roundEnd) {
+    const fighter = turn === 'A' ? FIGHTER_A : FIGHTER_B;
+    const colorVar = turn === 'A' ? '--blue' : '--red';
+    const errorLabel = turn === 'A' ? 'Groq' : 'Cohere';
+
+    try {
+      addTyping(fighter.emoji + ' ' + fighter.name + ' печатает…', colorVar);
+      // Build context from previous rounds if multi-topic
+      let prevContext = '';
+      if (S.roundSummaries.length > 0) {
+        prevContext = '\n\nКОНТЕКСТ ПРЕДЫДУЩИХ РАУНДОВ:\n' +
+          S.roundSummaries.map(rs => `Раунд ${rs.round} (тема: "${rs.topic}"): ${rs.summary}`).join('\n') +
+          '\nУчти этот контекст — спор продолжается, ссылайся на то что уже обсуждали.';
+      }
+      const sysPrompt = fighter.style + `\n\nТема ЭТОГО раунда: "${S.topic}".${prevContext}\nВАЖНО: пиши ровно 15-20 слов — не меньше и не больше. Отвечай на аргумент оппонента. Не повторяй то, что уже говорил.`;
+      const text = await callOR(fighter, sysPrompt, buildMsgs(turn));
+      rmTyping();
+
+      // Check time again — если пока ждали ответа время вышло, не показываем
+      const clean = text.trim().replace(/^\[.*?\]:\s*/, '');
+      S.history.push({ name: fighter.name, text: clean });
+      const hasInt = countInterrupt(clean);
+      addMsg(turn, fighter.emoji + ' ' + fighter.name, clean, hasInt > 0);
+      updateStats(turn, clean);
+
+      if (turn === 'A') S.scoreA += Math.min(3, Math.ceil(words(clean) / 8));
+      else              S.scoreB += Math.min(3, Math.ceil(words(clean) / 8));
+      updateScore();
+
+    } catch(e) {
+      rmTyping();
+      toast('Ошибка ' + errorLabel + ': ' + e.message);
+      // Short pause before retry / switching
+      await new Promise(r => setTimeout(r, 2000));
+    }
+
+    turn = turn === 'A' ? 'B' : 'A';
+
+    // Small pause between messages for readability
+    const gap = Math.min(600, roundEnd - Date.now());
+    if (gap > 0) await new Promise(r => setTimeout(r, gap));
+  }
+
+  clearInterval(ticker);
+  $('timer-lbl').textContent = '✓ РАУНД';
+  S.running = false;
+
+  // Save round summary for context in next round
+  if (S.topics.length > 1 && S.history.length > 0) {
+    const roundMsgs = S.history.slice(-10);
+    const summary = roundMsgs.map(h => h.name + ': ' + h.text).join(' | ');
+    S.roundSummaries.push({ round: S.curRound, topic: S.topic, summary });
+  }
+
+  if (S.curRound < S.maxRounds) {
+    // Auto-start next round after 1.5s pause
+    await new Promise(r => setTimeout(r, 1500));
+    if (S.curRound < S.maxRounds) await playRound();
+  }
+
+  if (S.curRound >= S.maxRounds) {
+    $('btn-judge').disabled = false;
+    $('timer-lbl').textContent = '🏁 ФИНАЛ';
+  }
+}
+
+async function nextRound() { /* kept for compatibility */ }
+
+
+async function callJudge() {
+  if(S.running) return;
+  S.running=true; $('btn-judge').disabled=true;
+
+  const sep=document.createElement('div'); sep.className='round-sep'; sep.textContent='⚖️ ВЕРДИКТ АРБИТРА'; $('chat-feed').appendChild(sep);
+  addTyping('⚖️ Арбитр анализирует…', '--gold');
+
+  const sa=S.statsA, sb=S.statsB;
+  const transcript = S.history.map(h=>`[${h.name}]: ${h.text}`).join('\n\n');
+  const topicsInfo = S.topics.length > 1
+    ? 'ТЕМЫ РАУНДОВ:\n' + S.topics.map((t,i)=>`Раунд ${i+1}: ${t}`).join('\n') + '\n\n'
+    : `Тема спора: "${S.topic}"\n\n`;
+  const prompt = `${topicsInfo}
+
+ПОЛНЫЙ ДИАЛОГ:
+${transcript}
+
+СТАТИСТИКА:
+${FIGHTER_A.name}: слов=${sa.w}, вопросов=${sa.q}, восклицаний=${sa.e}, согласий=${sa.agrees}, перебиваний=${sa.interrupts}, агрессия=${sa.agg}%
+${FIGHTER_B.name}: слов=${sb.w}, вопросов=${sb.q}, восклицаний=${sb.e}, согласий=${sb.agrees}, перебиваний=${sb.interrupts}, агрессия=${sb.agg}%
+
+Оцени спор объективно. Назови победителя по имени, его сильнейший аргумент и главную слабость проигравшего. Учти статистику. 4-5 предложений.`;
+
+  let verdict;
+  try {
+    verdict = await callOR(
+      JUDGE,
+      'Ты — беспристрастный арбитр дебатов. Оценивай логику аргументов, убедительность и риторику. Будь объективен.',
+      [{role:'user', content:prompt}]
+    );
+  } catch(e){ rmTyping(); toast('Ошибка арбитра: '+e.message); S.running=false; return; }
+
+  rmTyping();
+  verdict = verdict.trim();
+  addMsg('J', '⚖️ АРБИТР (Groq Llama)', verdict, false);
+
+  // Определяем победителя
+  const vl=verdict.toLowerCase();
+  const na=FIGHTER_A.name.toLowerCase(), nb=FIGHTER_B.name.toLowerCase();
+  let wName, wCls, wCrown;
+  if      (vl.includes(na) && !vl.includes(nb)) { wName=FIGHTER_A.name; wCls='a'; wCrown=FIGHTER_A.emoji; }
+  else if (vl.includes(nb) && !vl.includes(na)) { wName=FIGHTER_B.name; wCls='b'; wCrown=FIGHTER_B.emoji; }
+  else if (S.scoreA > S.scoreB)                  { wName=FIGHTER_A.name; wCls='a'; wCrown=FIGHTER_A.emoji; }
+  else if (S.scoreB > S.scoreA)                  { wName=FIGHTER_B.name; wCls='b'; wCrown=FIGHTER_B.emoji; }
+  else                                            { wName='НИЧЬЯ';        wCls='tie'; wCrown='🤝'; }
+
+  setTimeout(()=>{
+    $('w-crown').textContent=wCrown;
+    $('w-name').textContent=wName;
+    $('w-name').className='wname '+wCls;
+    $('w-verdict').textContent=verdict;
+    $('w-w-a').textContent=sa.w;
+    $('w-w-b').textContent=sb.w;
+    $('w-agree').textContent=`${sa.agrees} / ${sb.agrees}`;
+    $('w-int').textContent=`${sa.interrupts} / ${sb.interrupts}`;
+    $('w-agg').textContent=`${sa.agg}% / ${sb.agg}%`;
+    $('w-q').textContent=`${sa.q} / ${sb.q}`;
+    $('winner').classList.add('show');
+  }, 1000);
+
+  S.running=false;
+}
+
+function resetBattle(){
+  $('winner').classList.remove('show');
+  $('arena').style.display='none';
+  $('setup').style.display='block';
+  $('timer-lbl').textContent='⏱ —';
+  S.roundSummaries = [];
+  S.topics = [];
+}
+</script>
+</body>
+</html>
